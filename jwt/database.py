@@ -1,0 +1,27 @@
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import QueuePool
+
+
+# SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:6979@localhost/fastapidb'
+SQLALCHEMY_DATABASE_URL = "sqlite:///./user_auth.db" 
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    poolclass=QueuePool,
+    pool_size=10,
+    max_overflow=20,
+    pool_timeout=30,
+    pool_recycle=1800  
+)
+
+sessionlocal = sessionmaker(bind=engine)
+
+Base = declarative_base()
+
+def get_db():
+    db = sessionlocal()
+    try:
+        yield db
+    finally:
+        db.close()
